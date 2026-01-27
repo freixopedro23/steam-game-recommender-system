@@ -114,12 +114,12 @@ streamlit run app.py
 - Fonte: Kaggle — Steam Games Dataset
 - Registros: ~30.000 jogos
 - Campos principais:
-  -Tags
-  -Gêneros
-  -Desenvolvedor
-  -Publisher
-  -Avaliações da comunidade
-  -Compatibilidade por OS
+ - Tags
+ - Gêneros
+ - Desenvolvedor
+ - Publisher
+ - Avaliações da comunidade
+ - Compatibilidade por OS
 
 ---
 
