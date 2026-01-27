@@ -142,9 +142,14 @@ streamlit run app.py
 
 ---
 
-##👨‍💻 Autor
+## 👨‍💻 Autor
+
 **Pedro Freixo**
+
 🎓 Data Science — FIAP
+
 🎓 Profissão: Analista de Dados — EBAC
+
 🔗 GitHub: https://github.com/freixopedro23
+
 🔗 LinkedIn: https://www.linkedin.com/in/pedro-freixo-71b7ab212/
