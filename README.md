@@ -12,7 +12,7 @@ O projeto utiliza dados reais da Steam, processando descrições, tags, gêneros
 
 ## 📸 Screenshots
 
-![App Screenshot](<img width="1914" height="912" alt="image" src="https://github.com/user-attachments/assets/56e18df4-97c4-4588-8998-8d6aae1aa80f" />)
+<img src="[https://github.com/user-attachments/assets/56e18df4-97c4-4588-8998-8d6aae1aa80f](https://github.com/user-attachments/assets/56e18df4-97c4-4588-8998-8d6aae1aa80f)" alt="App Screenshot" width="100%">
 
 ---
 
@@ -53,26 +53,5 @@ Siga os passos abaixo para testar em sua máquina:
 
 ### 1. Clone o repositório
 ```bash
-git clone [https://github.com/SEU_USUARIO/game-matcher-ai.git](https://github.com/SEU_USUARIO/game-matcher-ai.git)
+git clone https://github.com/SEU_USUARIO/game-matcher-ai.git
 cd game-matcher-ai
-
----
-
-### 2. Instale as dependências
-```bash
-pip install -r requirements.txt
-
----
-
-### 3. Pipeline de Dados (Full Refresh)
-Para criar o banco de dados e treinar o modelo do zero, execute o pipeline principal com a flag de reset:
-```bash
-python main.py --reset
-
-Isso irá executar o ETL, criar o banco SQLite e gerar os arquivos .pkl na pasta models/.
-
----
-
-### 4. Inicie o App
-```bash
-streamlit run app.py
