@@ -1,57 +1,100 @@
-# 🎮 Game Matcher AI - Steam Recommendation System
+# 🎮 Game Matcher AI — Steam Game Recommendation System
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-App-red)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Content--Based-green)
 ![Status](https://img.shields.io/badge/Status-Completed-success)
 
-Um sistema de recomendação de jogos inteligente que utiliza **Processamento de Linguagem Natural (NLP)** e **Filtragem Baseada em Conteúdo** para sugerir novos jogos com base nos títulos que o usuário já gosta.
+## 📌 Visão Geral
 
-O projeto utiliza dados reais da Steam, processando descrições, tags, gêneros e desenvolvedores para calcular a similaridade matemática entre mais de 30.000 jogos.
+**Game Matcher AI** é um sistema de recomendação de jogos baseado em **Machine Learning e NLP**, desenvolvido para sugerir novos títulos da Steam a partir dos jogos que o usuário já aprecia.
+
+O projeto utiliza **Filtragem Baseada em Conteúdo**, processando **tags, gêneros, desenvolvedores e publishers** para calcular similaridade semântica entre **mais de 30.000 jogos reais da Steam**.
+
+O foco não é apenas o modelo, mas sim **todo o pipeline de dados**, desde a ingestão até a entrega do produto final via aplicação web interativa.
 
 ---
 
-## 📸 Screenshots
+## 🎯 Problema de Negócio
 
-<img src="[https://github.com/user-attachments/assets/56e18df4-97c4-4588-8998-8d6aae1aa80f](https://github.com/user-attachments/assets/56e18df4-97c4-4588-8998-8d6aae1aa80f)" alt="App Screenshot" width="100%">
+Encontrar novos jogos relevantes em plataformas com milhares de opções é um desafio comum para usuários da Steam.
+
+Este projeto busca responder:
+
+> *“Quais jogos têm maior chance de agradar um jogador, considerando apenas suas preferências explícitas e os metadados dos jogos?”*
+
+---
+
+## 🧠 Abordagem Técnica
+
+O sistema utiliza uma arquitetura **end-to-end**, composta por:
+
+- ETL estruturado
+- Banco de dados relacional
+- Feature Engineering com NLP
+- Modelo de Similaridade Vetorial
+- Interface web para consumo final
+
+---
+
+## 📸 Demonstração
+
+<img src="https://github.com/user-attachments/assets/56e18df4-97c4-4588-8998-8d6aae1aa80f" alt="App Screenshot" width="100%">
 
 ---
 
 ## ✨ Funcionalidades
 
-* **Busca Inteligente:** Encontre qualquer jogo da base de dados Steam.
-* **Recomendação por Similaridade:** Algoritmo *Cosine Similarity* treinado em uma "sopa" de metadados (Tags + Gênero + Dev).
-* **Filtros Dinâmicos:**
-    * 🚸 **Controle Parental:** Filtre por classificação etária.
-    * ⭐ **Qualidade:** Defina uma % mínima de aprovação da comunidade.
-    * 💻 **Plataforma:** Filtre jogos compatíveis com Windows, Mac ou Linux.
-* **Buffer de Candidatos:** O sistema analisa os Top 50 similares antes de aplicar os filtros, garantindo que você sempre receba 5 recomendações válidas.
+- 🔍 **Busca Inteligente** por qualquer jogo presente na base
+- 🎯 **Recomendação por Similaridade Semântica**
+  - Baseada em *Cosine Similarity*
+  - Vetorização de metadados textuais
+- 🎛️ **Filtros Dinâmicos**
+  - 🚸 Classificação etária
+  - ⭐ Percentual mínimo de aprovação da comunidade
+  - 💻 Compatibilidade com Windows, Mac e Linux
+- 🧠 **Buffer Inteligente de Candidatos**
+  - O modelo analisa os **Top 50 jogos mais similares**
+  - Após isso, aplica filtros para garantir **5 recomendações válidas**
 
 ---
 
-## 🛠️ Arquitetura do Projeto
+## 🏗️ Arquitetura do Projeto
 
-O projeto segue um pipeline de Engenharia de Machine Learning robusto:
+O projeto segue boas práticas de **Engenharia de Machine Learning**, organizado em camadas:
 
-1.  **ETL (`etl_steam.py`):**
-    * Ingestão de dados brutos (`csv`).
-    * Limpeza de strings (Regex) e tratamento de nulos.
-    * Carga em Banco de Dados SQL (`sqlite`).
-2.  **Modelagem (`model_training.py`):**
-    * **Feature Engineering:** Criação de uma *Bag of Words* ponderada (Tags têm peso maior).
-    * **Vetorização:** Uso de `CountVectorizer` (Scikit-Learn).
-    * **Cálculo:** Matriz de Similaridade de Cossenos.
-    * **Persistência:** Salvamento do modelo em arquivos `.pkl`.
-3.  **App (`app.py`):**
-    * Interface Front-end construída com **Streamlit**.
-    * Carregamento otimizado de modelos com Cache.
+### 1️⃣ ETL — `etl_steam.py`
+- Ingestão do dataset bruto (Kaggle)
+- Limpeza de dados com Regex
+- Tratamento de valores nulos
+- Persistência em banco **SQLite**
+
+### 2️⃣ Modelagem — `model_training.py`
+- **Feature Engineering**
+  - Criação de uma *feature soup* (Tags + Gêneros + Dev + Publisher)
+  - Peso maior para *tags* (maior relevância semântica)
+- **Vetorização**
+  - `CountVectorizer` (Scikit-learn)
+- **Modelo**
+  - Similaridade de Cossenos
+- **Persistência**
+  - Modelos salvos em arquivos `.pkl`
+
+### 3️⃣ Aplicação — `app.py`
+- Interface web desenvolvida com **Streamlit**
+- Cache de modelos para melhor performance
+- Filtros interativos em tempo real
 
 ---
 
-## 🚀 Como Rodar Localmente
+## 🚀 Como Executar Localmente
 
-Siga os passos abaixo para testar em sua máquina:
-
-### 1. Clone o repositório
+### 1️⃣ Clonar o repositório
 ```bash
-git clone https://github.com/SEU_USUARIO/game-matcher-ai.git
-cd game-matcher-ai
+git clone https://github.com/freixopedro23/steam-game-recommender-system.git
+cd steam-game-recommender-system
+
+### 2️⃣ Criar ambiente virtual
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
