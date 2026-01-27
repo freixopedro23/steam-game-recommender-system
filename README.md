@@ -13,7 +13,7 @@ O projeto utiliza dados reais da Steam, processando descrições, tags, gêneros
 ## 📸 Screenshots
 
 *(Aqui você pode colocar aquele print que você me mandou da tela com os filtros)*
-![App Screenshot](caminho/para/sua/imagem.png)
+![App Screenshot](<img width="1914" height="912" alt="image" src="https://github.com/user-attachments/assets/56e18df4-97c4-4588-8998-8d6aae1aa80f" />)
 
 ---
 
