@@ -90,7 +90,6 @@ O projeto segue boas práticas de **Engenharia de Machine Learning**, organizado
 ## 🚀 Como Executar Localmente
 
 ### 1️⃣ Clonar o repositório
-```bash
 git clone https://github.com/freixopedro23/steam-game-recommender-system.git
 cd steam-game-recommender-system
 
@@ -98,3 +97,54 @@ cd steam-game-recommender-system
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
+
+### 3️⃣ Instalar dependências
+pip install -r requirements.txt
+
+### 4️⃣ Executar pipeline completo
+python main.py --reset
+
+### 5️⃣ Rodar aplicação
+streamlit run app.py
+
+---
+
+## 📊 Dataset
+
+- Fonte: Kaggle — Steam Games Dataset
+- Registros: ~30.000 jogos
+- Campos principais:
+  -Tags
+  -Gêneros
+  -Desenvolvedor
+  -Publisher
+  -Avaliações da comunidade
+  -Compatibilidade por OS
+
+---
+
+## ⚠️ Limitações Atuais
+
+- Modelo 100% content-based (não utiliza histórico de usuários)
+- Similaridade calculada sobre metadados (não considera gameplay real)
+- Matriz de similaridade pode ser custosa em memória para grandes volumes
+
+---
+
+## 🔮 Próximos Passos (Evoluções Planejadas)
+
+- 🔄 Migrar de CountVectorizer para TF-IDF
+- ⚡ Implementar Top-K Nearest Neighbors (evitar matriz NxN)
+- 🧩 Versão híbrida (content-based + popularidade)
+- 👥 Integração com dados de reviews/playtime (Collaborative Filtering)
+- 📦 Dockerização do projeto
+- 🤖 Deploy em cloud (Streamlit Cloud / Hugging Face Spaces)
+
+---
+
+##👨‍💻 Autor
+**Pedro Freixo**
+🎓 Data Science — FIAP
+🎓 Profissão: Analista de Dados — EBAC
+🔗 GitHub: https://github.com/freixopedro23
+🔗 LinkedIn: https://www.linkedin.com/in/pedro-freixo-71b7ab212/
