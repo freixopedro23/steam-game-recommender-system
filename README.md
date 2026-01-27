@@ -56,3 +56,18 @@ Siga os passos abaixo para testar em sua máquina:
 ```bash
 git clone [https://github.com/SEU_USUARIO/game-matcher-ai.git](https://github.com/SEU_USUARIO/game-matcher-ai.git)
 cd game-matcher-ai
+
+### 2. Instale as dependências
+```bash
+pip install -r requirements.txt
+
+### 3. Pipeline de Dados (Full Refresh)
+Para criar o banco de dados e treinar o modelo do zero, execute o pipeline principal com a flag de reset:
+```bash
+python main.py --reset
+
+Isso irá executar o ETL, criar o banco SQLite e gerar os arquivos .pkl na pasta models/.
+
+### 4. Inicie o App
+```bash
+streamlit run app.py
