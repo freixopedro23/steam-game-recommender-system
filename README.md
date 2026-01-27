@@ -1,12 +1,58 @@
-# steam-game-recommender-system
-Projeto de ciências de dados que consiste na criação de um sistema recomendados de jogos Steam.
+# 🎮 Game Matcher AI - Steam Recommendation System
 
-Como rodar o projeto localmente:
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![Streamlit](https://img.shields.io/badge/Streamlit-App-red)
+![Status](https://img.shields.io/badge/Status-Completed-success)
 
-Clone o repositório.
+Um sistema de recomendação de jogos inteligente que utiliza **Processamento de Linguagem Natural (NLP)** e **Filtragem Baseada em Conteúdo** para sugerir novos jogos com base nos títulos que o usuário já gosta.
 
-  * Baixe o dataset neste link do [Kaggle](https://www.kaggle.com/datasets/artermiloff/steam-games-dataset) e salve na pasta data/.
-  * Rode o script de configuração:
-  * Rode o ETL:
-  * Treine o modelo:
-  * Inicie o App: 
+O projeto utiliza dados reais da Steam, processando descrições, tags, gêneros e desenvolvedores para calcular a similaridade matemática entre mais de 30.000 jogos.
+
+---
+
+## 📸 Screenshots
+
+*(Aqui você pode colocar aquele print que você me mandou da tela com os filtros)*
+![App Screenshot](caminho/para/sua/imagem.png)
+
+---
+
+## ✨ Funcionalidades
+
+* **Busca Inteligente:** Encontre qualquer jogo da base de dados Steam.
+* **Recomendação por Similaridade:** Algoritmo *Cosine Similarity* treinado em uma "sopa" de metadados (Tags + Gênero + Dev).
+* **Filtros Dinâmicos:**
+    * 🚸 **Controle Parental:** Filtre por classificação etária.
+    * ⭐ **Qualidade:** Defina uma % mínima de aprovação da comunidade.
+    * 💻 **Plataforma:** Filtre jogos compatíveis com Windows, Mac ou Linux.
+* **Buffer de Candidatos:** O sistema analisa os Top 50 similares antes de aplicar os filtros, garantindo que você sempre receba 5 recomendações válidas.
+
+---
+
+## 🛠️ Arquitetura do Projeto
+
+O projeto segue um pipeline de Engenharia de Machine Learning robusto:
+
+1.  **ETL (`etl_steam.py`):**
+    * Ingestão de dados brutos (`csv`).
+    * Limpeza de strings (Regex) e tratamento de nulos.
+    * Carga em Banco de Dados SQL (`sqlite`).
+2.  **Modelagem (`model_training.py`):**
+    * **Feature Engineering:** Criação de uma *Bag of Words* ponderada (Tags têm peso maior).
+    * **Vetorização:** Uso de `CountVectorizer` (Scikit-Learn).
+    * **Cálculo:** Matriz de Similaridade de Cossenos.
+    * **Persistência:** Salvamento do modelo em arquivos `.pkl`.
+3.  **App (`app.py`):**
+    * Interface Front-end construída com **Streamlit**.
+    * Carregamento otimizado de modelos com Cache.
+
+---
+
+## 🚀 Como Rodar Localmente
+
+Siga os passos abaixo para testar em sua máquina:
+
+### 1. Clone o repositório
+```bash
+git clone [https://github.com/SEU_USUARIO/game-matcher-ai.git](https://github.com/SEU_USUARIO/game-matcher-ai.git)
+cd game-matcher-ai
