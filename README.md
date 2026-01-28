@@ -180,12 +180,41 @@ streamlit run app.py
 
 ---
 
+## 📊 Avaliação do Modelo
+
+A qualidade das recomendações foi avaliada utilizando a métrica
+**avg_cosine@5**, que mede a similaridade média das 5 recomendações
+exibidas ao usuário.
+
+Resultados obtidos no benchmark:
+
+- avg_cosine@5: ~30%
+- avg_tags@5: ~40%
+- Observou-se maior desempenho em jogos com mecânicas bem definidas
+  (RPG, simulação, roguelike) e menor desempenho em jogos narrativos
+  abstratos.
+
+Esses resultados são esperados em sistemas de recomendação
+baseados exclusivamente em conteúdo e metadados.
+
+---
+
+## ⚠️ Limitações Conhecidas
+
+- O sistema é 100% content-based, não utilizando histórico de usuários.
+- Jogos com descrições conceituais ou poucas tags tendem a apresentar
+  menor similaridade semântica.
+- A abordagem depende fortemente da qualidade dos metadados disponíveis.
+
+Essas limitações motivam futuras evoluções do projeto.
+
+---
+
 ## 🔮 Próximos Passos
-- 🔄 Versão híbrida (conteúdo + popularidade)
-- 👥 Collaborative filtering com reviews/playtime
-- 🧠 Explicabilidade das recomendações no app
-- 📦 Dockerização
-- 🔄 Versionamento de modelos
+
+- Implementar abordagem híbrida (conteúdo + popularidade).
+- Explorar Collaborative Filtering com dados de interações reais.
+- Avaliar métricas por cluster de gênero.
 
 ---
 
