@@ -4,7 +4,8 @@ import pickle
 import streamlit as st
 import time
 from model_training import train_model
-
+from db_setup import init_db
+from etl_steam import run_etl
 
 st.set_page_config(
     page_title="Game Matcher Steam",
@@ -100,24 +101,41 @@ if df_games is None:
     st.warning("⚠️ Os modelos de IA ainda não foram gerados.")
     st.info("Como é a primeira execução, precisamos processar o banco de dados. Isso pode levar cerca de 1 minuto.")
 
-    if st.button("🚀 Iniciar Treinamento do Modelo"):
+    if st.button("🚀 Iniciar Instalação Completa"):
         progress_bar = st.progress(0)
         status_text = st.empty()
 
         try:
-            status_text.text("Iniciando treinamento...")
+            # PASSO 1: Criar o Banco de Dados (Tabelas vazias)
+            status_text.text("1/3: Criando Banco de Dados SQL...")
+            init_db()
+            progress_bar.progress(20)
 
-            with st.spinner("Processando NLP e  Matriz de Similaridade..."):
+            # PASSO 2: Rodar ETL (CSV -> SQL)
+            status_text.text("2/3: Carregando dados do CSV para o SQL (ETL)...")
+            # O ETL precisa que o arquivo CSV esteja na pasta 'data/' no GitHub!
+            with st.spinner('Importando dados brutos...'):
+                run_etl()
+            progress_bar.progress(60)
+
+            # PASSO 3: Treinar Modelo (SQL -> PKL)
+            status_text.text("3/3: Treinando Inteligência Artificial...")
+            with st.spinner('Processando NLP e Matriz de Vizinhos...'):
                 train_model()
+            progress_bar.progress(90)
 
+            # FINALIZAÇÃO
+            status_text.text("✅ Tudo pronto! Reiniciando...")
             progress_bar.progress(100)
-            st.success("Treinamento processado com sucesso!")
+
+            # Limpa o cache para carregar os novos arquivos
             load_data.clear()
             time.sleep(1)
             st.rerun()
 
         except Exception as e:
-            st.error(f"Erro ao treinar: {e}")
+            st.error(f"❌ Erro Crítico no Pipeline: {e}")
+            st.error("Verifique se a pasta 'data/' e o arquivo CSV foram enviados para o GitHub.")
 
     st.stop()
 
