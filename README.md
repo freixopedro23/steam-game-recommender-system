@@ -108,11 +108,84 @@ Para validação da qualidade das recomendações, foi criado o script `evaluate
 
 ### 🔍 Resultado do teste
 
-JOGO DE ENTRADA           | RECOMENDAÇÃO              | COSINE (IA)  | TAGS (REAL) 
--------------------------------------------------------------------------------------
-Stardew Valley            | Moonstone Island          | 55.7%      | 48.1%
-Counter-Strike 2          | Team Fortress 2           | 52.8%      | 37.9%
-Baldur's Gate 3           | Divinity: Original Sin 2 - Definitive Edition | 42.6%      | 29.0%
-Euro Truck Simulator 2    | American Truck Simulator  | 56.3%      | 73.9%
-ELDEN RING                | DARK SOULS™ III           | 59.5%      | 60.0%
--------------------------------------------------------------------------------------
+JOGO DE ENTRADA | RECOMENDAÇÃO | COSINE (IA) | TAGS (REAL)
+Stardew Valley | Moonstone Island | 55.7% | 48.1%
+Counter-Strike 2 | Team Fortress 2 | 52.8% | 37.9%
+Baldur's Gate 3 | Divinity: Original Sin 2 | 42.6% | 29.0%
+Euro Truck Simulator 2 | American Truck Simulator | 56.3% | 73.9%
+ELDEN RING | DARK SOULS™ III | 59.5% | 60.0%
+
+✅ Média Similaridade do Modelo (IA): 53.4%
+✅ Média Overlap de Tags (Validação): 49.8%
+
+---
+
+## 🚀 Como Executar Localmente
+
+### 1️⃣ Clonar o repositório
+```bash
+git clone https://github.com/freixopedro23/steam-game-recommender-system.git
+cd steam-game-recommender-system
+```
+
+### 2️⃣ Criar ambiente virtual
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+```
+
+### 3️⃣ Instalar dependências
+```bash
+pip install -r requirements.txt
+```
+
+### 4️⃣ Executar pipeline completo
+```bash
+python main.py --reset
+```
+
+### 5️⃣ Rodar aplicação
+```bash
+streamlit run app.py
+```
+
+---
+
+## 📦 Dataset
+
+- Fonte: Kaggle — Steam Games Dataset
+- Registros Total: ~90.000 jogos
+- Principais campos:
+  - Tags
+  - Gêneros
+  - Desenvolvedor / Publisher
+  - Avaliações da comunidade
+  - Compatibilidade por sistema operacional
+
+---
+
+## Limitações Atuais
+
+- Sistema 100% content-based
+- Não utiliza histórico real de usuários
+- Similaridade baseada apenas em metadados
+
+---
+
+## 🔮 Próximos Passos
+- 🔄 Versão híbrida (conteúdo + popularidade)
+- 👥 Collaborative filtering com reviews/playtime
+- 🧠 Explicabilidade das recomendações no app
+- 📦 Dockerização
+- 🔄 Versionamento de modelos
+
+---
+
+## 👨‍💻 Autor
+**Pedro Freixo**
+🎓 Data Science — FIAP
+🎓 Profissão: Analista de Dados — EBAC
+
+🔗 GitHub: https://github.com/freixopedro23
+🔗 LinkedIn: https://www.linkedin.com/in/pedro-freixo-71b7ab212/
