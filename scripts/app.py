@@ -7,6 +7,43 @@ from model_training import train_model
 from db_setup import init_db
 from etl_steam import run_etl
 
+# Adicionando explicabilidade
+def normalize_tag(tag_string: str) -> str:
+    """Transforma a tag string de tags em um set limpo."""
+
+    if pd.isna(tag_string) or tag_string is None or str(tag_string).strip() == "":
+        return set()
+
+    s = str(tag_string)
+
+    # Remove chaves se vier no formato de dicionário
+    s = s.replace("{", "").replace("}", "")
+
+    tags = set()
+    for item in s.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        if ":" in item:
+            item = item.split(":")[0].strip()
+        tag = item.lower()
+        if tag and tag != "nan":
+            tags.add(tag)
+    return tags
+
+def top_common_tags(tags_a: str, tags_b: str, k = 5) -> list[str]:
+    a = normalize_tag(tags_a)
+    b = normalize_tag(tags_b)
+    common = sorted(a.intersection(b))
+    return common[:k]
+
+def safe_first_genre(genres: str) -> str | None:
+    if pd.isna(genres) or genres is None or str(genres).strip() == "":
+        return None
+    g = str(genres).split(",")[0].strip()
+    return g if g else None
+
+
 st.set_page_config(
     page_title="Game Matcher Steam",
     page_icon="🎮",
@@ -16,6 +53,7 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+    /* Botões */
     .stButton>button {
         width: 100%;
         background-color: #FF4B4B;
@@ -23,12 +61,52 @@ st.markdown("""
         height: 3em;
         border-radius: 10px;
     }
+
+    /* Imagens */
     div.stImage > img {
         border-radius: 10px;
         transition: transform .2s;
     }
     div.stImage > img:hover {
         transform: scale(1.05);
+    }
+
+    .why-card { 
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 12px; 
+        padding: 10px 12px; 
+        margin-top: 8px;
+    }
+
+
+
+    .why-title {
+        font-size: 12px; 
+        opacity: 0.8; 
+        margin-bottom: 6px;
+    }
+
+    .chip {
+        display: inline-block;
+        padding: 3px 8px;
+        margin: 2px 6px 2px 0;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.06);
+        white-space: nowrap;
+    }
+
+    .chip-strong {
+        border-color: rgba(255,75,75,0.55);
+        background: rgba(255,75,75,0.18);
+    }
+
+    .why-line {
+        font-size: 12px;
+        opacity: 0.85;
+        margin-top: 6px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -163,8 +241,31 @@ if game_option:
 
             recommended_games = []
 
+            # Guardando informações do jogo selecionado
+            selected_idx = indices_map[game_option]
+            selected_game = df_games.iloc[selected_idx]
+            selected_tags = selected_game.get("ds_tags", "")
+            selected_genres = selected_game.get("ds_genres", "")
+            selected_dev = selected_game.get("ds_developer", "")
+            selected_pub = selected_game.get("ds_publisher", "")
+
             for i, game_idx in enumerate(neighbor_indices):
                 game_data = df_games.iloc[game_idx]
+
+                # Tentando entender quais foram os matchs para a seleção dos jogos
+                common_tags = top_common_tags(selected_tags, game_data.get("ds_tags", ""), k=5)
+
+                rec_genre = game_data.get("ds_genres", "")
+                genre_match = (safe_first_genre(selected_genres) is not None and
+                               safe_first_genre(selected_genres) == safe_first_genre(rec_genre))
+
+                dev_match = False
+                if pd.notna(selected_dev) and pd.notna(game_data.get("ds_developer", None)):
+                    dev_match = str(selected_dev).strip().lower() == str(game_data["ds_developer"]).strip().lower()
+
+                pub_match = False
+                if pd.notna(selected_pub) and pd.notna(game_data.get("ds_publisher", None)):
+                    pub_match = str(selected_pub).strip().lower() == str(game_data["ds_publisher"]).strip().lower()
 
                 similarity_score = 1 - neighbor_distances[i]
 
@@ -190,6 +291,10 @@ if game_option:
 
                 # Se passou em tudo, adiciona na lista final
                 game_data['match_score'] = similarity_score
+                game_data["explain_common_tags"] = common_tags
+                game_data["explain_genre_match"] = genre_match
+                game_data["explain_dev_match"] = dev_match
+                game_data["explain_pub_match"] = pub_match
                 recommended_games.append(game_data)
 
                 if len(recommended_games) >= 5:
@@ -216,16 +321,49 @@ if game_option:
                         # Título
                         st.markdown(f"**{game_data['nm_game']}**")
 
+                        # Explicabilidade
+                        reasons = []
+
+                        with st.expander("🔍 Ver motivo da recomendação", expanded=False):
+                            common_tags = game_data.get("explain_common_tags", []) or []
+
+                            genre = safe_first_genre(game_data.get("ds_genres", ""))
+
+                            chips_html = ""
+                            for t in common_tags[:6]:
+                                chips_html += f"<span class='chip chip-strong'>🏷️ {t}</span>"
+
+                            extra = []
+                            if game_data.get("explain_genre_match", False) and genre:
+                                extra.append(f"🎭 Mesmo gênero: {genre}")
+                            if game_data.get("explain_dev_match", False):
+                                extra.append("👨‍💻 Mesmo dev")
+                            if game_data.get("explain_pub_match", False):
+                                extra.append("🏢 Mesmo publisher")
+
+                            extra_line = " · ".join(extra[:2])  # no máximo 2 infos
+
+                            st.markdown(
+                                f"""
+                                <div class="why-card">
+                                    <div class="why-title">Motivos</div>
+                                    <div>{chips_html if chips_html else "<span class='chip'>Sem tags em comum</span>"}</div>
+                                    {f"<div class='why-line'>{extra_line}</div>" if extra_line else ""}
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                            )
+
                         # Dados extras
                         genre = str(game_data['ds_genres']).split(',')[0] if game_data['ds_genres'] else "Game"
                         st.caption(f"🏷️ {genre}")
 
                         # Aprovação
-                        st.caption(f"👍 Aprovação: {int(game_data['vl_positive_ratio'])}%")
+                        st.caption(f" 👍 Aprovação: {int(game_data['vl_positive_ratio'])}%")
 
                         score = game_data['vl_metacritic_score']
                         if score and score > 0:
-                            st.caption(f"⭐ Metacritic: {score}")
+                            st.caption(f" ⭐ Metacritic: {score}")
 
                         # Ícones de OS
                         os_icons = ""

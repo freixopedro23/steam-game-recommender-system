@@ -36,7 +36,7 @@ def normalize_tags(tag_string):
         else:
             tag_name = item
         tag_clean = tag_name.strip().lower()
-        if tag_clean: cleaned_tags.add(tag_clean)
+        if tag_clean and tag_clean != "nan": cleaned_tags.add(tag_clean)
     return cleaned_tags
 
 
@@ -52,53 +52,56 @@ def calculate_tag_overlap(tags1, tags2):
 
 def run_evaluation():
     knn_indices, knn_distances, df, indices_map = load_models()
+    top_k = 5
 
-    test_games = [
-        "Stardew Valley",
-        "Counter-Strike 2",
-        "Baldur's Gate 3",
-        "Euro Truck Simulator 2",
-        "ELDEN RING"
-    ]
+    with open('benchmarks/test_games.txt', 'r', encoding='utf-8') as arquivo:
+        test_games = [linha.strip() for linha in arquivo]
 
-    # Cabeçalho ajustado para mostrar as duas métricas
-    print(f"{'JOGO DE ENTRADA':<25} | {'RECOMENDAÇÃO':<25} | {'COSINE (IA)':<12} | {'TAGS (REAL)':<12}")
-    print("-" * 85)
+    print(f"{'JOGO DE ENTRADA':<25} | {'TOP-1 RECOMENDAÇÃO':<40} | {'COSINE@5':<10} | {'TAGS@5':<10}")
+    print("-" * 100)
 
-    tag_scores = []
-    model_scores = []
+    cosine_at_k_scores = []
+    overlap_at_k_scores = []
 
     for game in test_games:
         if game not in indices_map:
+            print(f"{game:<25} | (não encontrado no dataset)")
             continue
 
         idx = indices_map[game]
-        original_tags = df.iloc[idx]['ds_tags']
+        original_tags = df.iloc[idx].get("ds_tags", "")
 
-        # Pega o Top 1 Vizinho (índice 1)
-        neighbor_idx = knn_indices[idx][1]
-        neighbor_dist = knn_distances[idx][1]
+        neighbor_indices_topk = knn_indices[idx][1:1 + top_k]
+        neighbor_distances_topk = knn_distances[idx][1:1 + top_k]
 
-        # Converte distância em similaridade (1 - distância)
-        # Cosine Distance vai de 0 (idêntico) a 1 (oposto)
-        similarity_model = 1 - neighbor_dist
+        # Cosine@K (média da similaridade do Top-K)
+        similarities_topk = 1 - neighbor_distances_topk
+        cosine_at_k = float(np.mean(similarities_topk))
 
-        recommended_game = df.iloc[neighbor_idx]
+        # Top-K recomendados
+        recommended_games = df.iloc[neighbor_indices_topk]
+        top1 = recommended_games.iloc[0]
 
-        # Calcula Overlap de Tags
-        tag_score = calculate_tag_overlap(original_tags, recommended_game['ds_tags'])
+        # Tags@K (média do overlap de tags no Top-K)
+        overlaps = []
+        for _, rec in recommended_games.iterrows():
+            overlaps.append(calculate_tag_overlap(original_tags, rec.get("ds_tags", "")))
+        tags_at_k = float(np.mean(overlaps)) if overlaps else 0.0
 
-        tag_scores.append(tag_score)
-        model_scores.append(similarity_model)
+        cosine_at_k_scores.append(cosine_at_k)
+        overlap_at_k_scores.append(tags_at_k)
 
-        print(f"{game:<25} | {recommended_game['nm_game']:<25} | {similarity_model:.1%}      | {tag_score:.1%}")
+        print(f"{game:<25} | {str(top1['nm_game'])[:40]:<40} | {cosine_at_k:.1%}     | {tags_at_k:.1%}")
 
-    if tag_scores:
-        avg_tag = np.mean(tag_scores)
-        avg_model = np.mean(model_scores)
-        print("-" * 85)
-        print(f"✅ Média Similaridade do Modelo (O que a IA acha):  {avg_model:.1%}")
-        print(f"✅ Média Overlap de Tags (Validação Explicável):   {avg_tag:.1%}")
+    if cosine_at_k_scores:
+        avg_cosine = float(np.mean(cosine_at_k_scores))
+        std_cosine = float(np.std(cosine_at_k_scores))
+        avg_tags = float(np.mean(overlap_at_k_scores))
+        std_tags = float(np.std(overlap_at_k_scores))
+
+        print("-" * 100)
+        print(f"✅ avg_cosine@{top_k}: {avg_cosine:.1%}   | 📉 std_cosine@{top_k}: {std_cosine:.1%}")
+        print(f"✅ avg_tags@{top_k}:   {avg_tags:.1%}   | 📉 std_tags@{top_k}:   {std_tags:.1%}")
 
 
 if __name__ == "__main__":
