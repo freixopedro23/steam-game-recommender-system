@@ -108,3 +108,11 @@ Para validação da qualidade das recomendações, foi criado o script `evaluate
 
 ### 🔍 Resultado do teste
 
+JOGO DE ENTRADA           | RECOMENDAÇÃO              | COSINE (IA)  | TAGS (REAL) 
+-------------------------------------------------------------------------------------
+Stardew Valley            | Moonstone Island          | 55.7%      | 48.1%
+Counter-Strike 2          | Team Fortress 2           | 52.8%      | 37.9%
+Baldur's Gate 3           | Divinity: Original Sin 2 - Definitive Edition | 42.6%      | 29.0%
+Euro Truck Simulator 2    | American Truck Simulator  | 56.3%      | 73.9%
+ELDEN RING                | DARK SOULS™ III           | 59.5%      | 60.0%
+-------------------------------------------------------------------------------------
