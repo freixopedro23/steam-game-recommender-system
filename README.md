@@ -99,7 +99,7 @@ O projeto segue boas práticas de **Engenharia de Machine Learning**, organizado
 
 ---
 
-## 📊 Avaliação do Modelo
+## 📊 Avaliação — Exemplos Ilustrativos
 
 Para validação da qualidade das recomendações, foi criado o script `evaluate.py`, que compara:
 
@@ -107,6 +107,9 @@ Para validação da qualidade das recomendações, foi criado o script `evaluate
 - **TAGS (REAL):** overlap de tags usando índice de Jaccard (validação explicável)
 
 ### 🔍 Resultado do teste
+Abaixo estão alguns exemplos individuais de recomendações para jogos populares,
+apenas para fins ilustrativos.
+
 
 JOGO DE ENTRADA | RECOMENDAÇÃO | COSINE (IA) | TAGS (REAL)
 
@@ -162,7 +165,7 @@ streamlit run app.py
 ## 📦 Dataset
 
 - Fonte: Kaggle — Steam Games Dataset
-- Registros Total: ~90.000 jogos
+- Registros utilizados após limpeza: ~16.000 jogos
 - Principais campos:
   - Tags
   - Gêneros
