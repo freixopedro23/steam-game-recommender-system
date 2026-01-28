@@ -2,8 +2,9 @@ import os
 import pandas as pd
 import pickle
 import streamlit as st
-from model_training import train_model
 import time
+from model_training import train_model
+
 
 st.set_page_config(
     page_title="Game Matcher Steam",
@@ -36,25 +37,25 @@ def load_data():
     path_models = 'models'
 
     # Verifica se existem
-    required_files = ['similarity_matrix.pkl', 'dataframe.pkl', 'indices.pkl']
-    missing_files = [f for f in required_files if not os.path.exists(os.path.join(path_models, f))]
-
-    if missing_files:
-        return None, None, None
+    required_files = ['neighbors_indices.pkl', 'neighbors_distances.pkl', 'dataframe.pkl', 'indices_map.pkl']
+    if not all([os.path.exists(os.path.join(path_models, f)) for f in required_files]):
+        return None, None, None, None
 
     try:
-        with open(os.path.join(path_models, 'similarity_matrix.pkl'), 'rb') as f:
-            similarity = pickle.load(f)
+        with open(os.path.join(path_models, 'neighbors_indices.pkl'), 'rb') as f:
+            knn_indices = pickle.load(f)
+        with open(os.path.join(path_models, 'neighbors_distances.pkl'), 'rb') as f:
+            knn_distances = pickle.load(f)
         with open(os.path.join(path_models, 'dataframe.pkl'), 'rb') as f:
             df = pickle.load(f)
-        with open(os.path.join(path_models, 'indices.pkl'), 'rb') as f:
-            indices = pickle.load(f)
-        return similarity, df, indices
-    except FileNotFoundError:
-        return None, None, None
+        with open(os.path.join(path_models, 'indices_map.pkl'), 'rb') as f:
+            indices_map = pickle.load(f)
+        return knn_indices, knn_distances, df, indices_map
+    except Exception:
+        return None, None, None, None
 
 # Tenta carregar
-similarity, df_games, indices = load_data()
+knn_indices, knn_distances, df_games, indices_map = load_data()
 
 
 with st.sidebar:
@@ -111,6 +112,7 @@ if df_games is None:
 
             progress_bar.progress(100)
             st.success("Treinamento processado com sucesso!")
+            load_data.clear()
             time.sleep(1)
             st.rerun()
 
@@ -135,18 +137,18 @@ if game_option:
     if st.button("🔍 Encontrar Recomendações"):
         try:
             # ID do jogo escolhido
-            idx = indices[game_option]
+            idx = indices_map[game_option]
 
-            # Pega as similaridades
-            sim_scores = list(enumerate(similarity[idx]))
-            sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-            candidate_indexes = sim_scores[1:51]
+            # Pega os 50 vizinhos
+            neighbor_indices = knn_indices[idx][1:]
+            neighbor_distances = knn_distances[idx][1:]
 
             recommended_games = []
 
-            for i in candidate_indexes:
-                game_idx = i[0]
+            for i, game_idx in enumerate(neighbor_indices):
                 game_data = df_games.iloc[game_idx]
+
+                similarity_score = 1 - neighbor_distances[i]
 
                 # Filtragem
                 # 1. Idade
@@ -169,6 +171,7 @@ if game_option:
                     continue
 
                 # Se passou em tudo, adiciona na lista final
+                game_data['match_score'] = similarity_score
                 recommended_games.append(game_data)
 
                 if len(recommended_games) >= 5:

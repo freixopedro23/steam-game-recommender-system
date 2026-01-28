@@ -33,7 +33,7 @@ def run_etl():
     df_game.drop_duplicates(subset=['name', 'developers'], inplace=True)
 
     # Evitado erros na coluna de percentual positivo total
-    df_game['pct_pos_total'].fillna(0, inplace=True)
+    df_game['pct_pos_total'] = df_game['pct_pos_total'].fillna(0)
 
     # Limpando as colunas que contém listas
     cols_to_clean = ['genres', 'tags', 'developers', 'categories', 'publishers', ]

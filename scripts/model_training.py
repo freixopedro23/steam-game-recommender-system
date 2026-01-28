@@ -1,7 +1,7 @@
 import pandas as pd
 from sqlalchemy import create_engine
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.neighbors import NearestNeighbors
 import pickle
 import os
 
@@ -18,43 +18,53 @@ engine = create_engine(DATABASE_URL)
 def train_model():
     print("🧠 Iniciando treinamento...")
 
-    # Carregar dados (Limitando aos Top 35k mais avaliados para performance)
+    # Carregar dados
     query = """
             SELECT * \
             FROM game
-            ORDER BY vl_recommendations DESC LIMIT 35000 \
+            WHERE vl_recommendations >= 20 \
             """
     print("📦 Carregando os jogos do SQL...")
     df_treino = pd.read_sql(query, engine)
 
-    print(f"Antes da limpeza: {len(df_treino)} linhas")
-    df_treino = df_treino.drop_duplicates(subset='nm_game', keep='first')
-    df_treino = df_treino.reset_index(drop=True)
-    print(f"Linhas carregadas do Banco: {len(df_treino)} linhas")
+    df_treino = df_treino.drop_duplicates(subset='nm_game', keep='first').reset_index(drop=True)
+    print(f"Jogos para treino: {len(df_treino)}")
 
     # "Feature Soup"
     # Juntamos Gêneros, Tags, Desenvolvedores e Descrição numa única string
     print("🍲 Cozinhando a 'Sopa de Features' (NLP)...")
     def create_soup(x):
         # Tratamento para garantir que tudo seja string
-        genres = str(x['ds_genres']) if x['ds_genres'] else ''
-        tags = str(x['ds_tags']) if x['ds_tags'] else ''
-        developers = str(x['ds_developer']) if x['ds_developer'] else ''
-        publisher = str(x['ds_publisher']) if x['ds_publisher'] else ''
+        genres = str(x['ds_genres']) if pd.notna(x['ds_genres']) and x['ds_genres'] else ''
+        tags = str(x['ds_tags']) if pd.notna(x['ds_tags']) and x['ds_tags'] else ''
+        developers = str(x['ds_developer']) if pd.notna(x['ds_developer']) and x['ds_developer'] else ''
+        publisher = str(x['ds_publisher']) if pd.notna(x['ds_publisher']) and x['ds_publisher'] else ''
+        short_desc = str(x['ds_short_description']) if pd.notna(x['ds_short_description']) and x['ds_short_description'] else ''
         # Damos peso duplicado para TAGS, pois elas definem melhor o jogo
-        return genres + ' ' + tags + ' ' + tags + ' ' + developers + ' ' + publisher
+        return (
+                genres + ' ' + genres + ' ' +
+                tags + ' ' + tags + ' ' + tags + ' ' +
+                developers + ' ' +
+                publisher + ' ' +
+                short_desc
+        )
+
 
     df_treino['soup'] = df_treino.apply(create_soup, axis=1)
 
     # NLP - stop-words: necessário para tirar o the, and
-    print("🧮 Vetorizando textos (CountVectorizer)...")
-    count = CountVectorizer(stop_words='english', min_df=5)
-    count_matrix = count.fit_transform(df_treino['soup'])
+    print("🧮 Vetorizando com TF-IDF..")
+    tfidf = TfidfVectorizer(stop_words='english', min_df=5, ngram_range=(1, 2))
+
+    tfidf_matrix = tfidf.fit_transform(df_treino['soup'])
+    print(f"Matriz Gerada: {tfidf_matrix.shape[0]} jogos x {tfidf_matrix.shape[1]} palavras/termos")
+
     # Cálculo de Similaridade (A Mágica)
     print("📐 Calculando similaridade de Cossenos...")
-    cosine_sim = cosine_similarity(count_matrix, count_matrix)
+    model_knn = NearestNeighbors(metric='cosine', algorithm='brute', n_jobs=-1)
+    model_knn.fit(tfidf_matrix)
 
-    indices = pd.Series(df_treino.index, index=df_treino['nm_game'])
+    distances, indices = model_knn.kneighbors(tfidf_matrix, n_neighbors=50)
 
     # Salvar
     print("💾 Salvando arquivos .pkl...")
@@ -63,15 +73,20 @@ def train_model():
     if not os.path.exists('models'):
         os.makedirs('models')
 
-    # Salvamos a Matriz de Similaridade (O Cérebro)
-    with open('models/similarity_matrix.pkl', 'wb') as f:
-        pickle.dump(cosine_sim, f)
-    # Salvamos o DataFrame (A Memória - para mostrar imagem e preço)
+    # Salvamos apenas a matriz de índices (N_jogos x 50)
+    with open('models/neighbors_indices.pkl', 'wb') as f:
+        pickle.dump(indices, f)
+    # Se quiser mostrar a % de match, salve 'distances' também
+    with open('models/neighbors_distances.pkl', 'wb') as f:
+        pickle.dump(distances, f)
+    # Salvamos o índice (O Mapa)
     with open('models/dataframe.pkl', 'wb') as f:
         pickle.dump(df_treino, f)
-    # Salvamos o índice (O Mapa)
-    with open('models/indices.pkl', 'wb') as f:
-        pickle.dump(indices, f)
+    # O mapa de nomes
+    indices_map = pd.Series(df_treino.index, index=df_treino['nm_game'])
+    with open('models/indices_map.pkl', 'wb') as f:
+        pickle.dump(indices_map, f)
+
 
     print("✅ Modelo treinado e salvo na pasta 'models/'!")
 

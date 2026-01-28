@@ -22,14 +22,14 @@ class Game(Base):
 
     # Identificador
     cd_game = Column(Integer, primary_key=True)
-    nm_game = Column(String(100))
+    nm_game = Column(String(255))
 
     # Dados Front-End
     dt_release = Column(Date, default=func.now())
     vl_price = Column(Float)
-    ds_url_header = Column(String(100))
-    ds_website = Column(String(100))
-    ds_support_url = Column(String(100))
+    ds_url_header = Column(String(500))
+    ds_website = Column(String(500))
+    ds_support_url = Column(String(500))
 
     # Filtros
     vl_required_age = Column(Integer)
