@@ -2,38 +2,45 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-App-red)
-![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Content--Based-green)
-![Status](https://img.shields.io/badge/Status-Completed-success)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Recommender%20System-green)
+![Status](https://img.shields.io/badge/Status-Deployed-success)
+
+## 🌐 Demo Online
+
+👉 **Teste o app ao vivo:**  
+https://steam-game-recommender-system-rvsg9fqukzey6sq2do2d9h.streamlit.app/
+
+---
 
 ## 📌 Visão Geral
 
-**Game Matcher AI** é um sistema de recomendação de jogos baseado em **Machine Learning e NLP**, desenvolvido para sugerir novos títulos da Steam a partir dos jogos que o usuário já aprecia.
+**Game Matcher AI** é um sistema de recomendação de jogos da Steam baseado em **Machine Learning e NLP**, desenvolvido para sugerir novos títulos a partir de um jogo de referência escolhido pelo usuário.
 
-O projeto utiliza **Filtragem Baseada em Conteúdo**, processando **tags, gêneros, desenvolvedores e publishers** para calcular similaridade semântica entre **mais de 30.000 jogos reais da Steam**.
+O projeto utiliza **Filtragem Baseada em Conteúdo**, processando **tags, gêneros, desenvolvedores, publishers e descrições** para calcular similaridade semântica entre **mais de 30.000 jogos reais da Steam**.
 
-O foco não é apenas o modelo, mas sim **todo o pipeline de dados**, desde a ingestão até a entrega do produto final via aplicação web interativa.
+O foco do projeto é demonstrar um **pipeline completo de dados**, desde a ingestão e modelagem até o deploy de uma aplicação web interativa.
 
 ---
 
 ## 🎯 Problema de Negócio
 
-Encontrar novos jogos relevantes em plataformas com milhares de opções é um desafio comum para usuários da Steam.
+Com milhares de jogos disponíveis na Steam, encontrar títulos relevantes pode ser difícil, especialmente sem histórico de usuário.
 
-Este projeto busca responder:
+Este projeto busca responder à pergunta:
 
-> *“Quais jogos têm maior chance de agradar um jogador, considerando apenas suas preferências explícitas e os metadados dos jogos?”*
+> *“Quais jogos têm maior probabilidade de agradar um jogador, considerando apenas os metadados e similaridade de conteúdo?”*
 
 ---
 
 ## 🧠 Abordagem Técnica
 
-O sistema utiliza uma arquitetura **end-to-end**, composta por:
+O sistema foi desenvolvido seguindo uma arquitetura **end-to-end**, composta por:
 
 - ETL estruturado
 - Banco de dados relacional
 - Feature Engineering com NLP
-- Modelo de Similaridade Vetorial
-- Interface web para consumo final
+- Modelo de Similaridade Vetorial (Top-K)
+- Aplicação web para consumo final
 
 ---
 
@@ -45,17 +52,17 @@ O sistema utiliza uma arquitetura **end-to-end**, composta por:
 
 ## ✨ Funcionalidades
 
-- 🔍 **Busca Inteligente** por qualquer jogo presente na base
+- 🔍 **Busca Inteligente** por qualquer jogo da base Steam
 - 🎯 **Recomendação por Similaridade Semântica**
-  - Baseada em *Cosine Similarity*
-  - Vetorização de metadados textuais
+  - TF-IDF + Similaridade de Cossenos
+  - Recomendação Top-K com KNN
 - 🎛️ **Filtros Dinâmicos**
   - 🚸 Classificação etária
   - ⭐ Percentual mínimo de aprovação da comunidade
   - 💻 Compatibilidade com Windows, Mac e Linux
 - 🧠 **Buffer Inteligente de Candidatos**
-  - O modelo analisa os **Top 50 jogos mais similares**
-  - Após isso, aplica filtros para garantir **5 recomendações válidas**
+  - O modelo analisa os Top 50 jogos mais similares
+  - Após os filtros, retorna até 5 recomendações válidas
 
 ---
 
@@ -65,88 +72,39 @@ O projeto segue boas práticas de **Engenharia de Machine Learning**, organizado
 
 ### 1️⃣ ETL — `etl_steam.py`
 - Ingestão do dataset bruto (Kaggle)
-- Limpeza de dados com Regex
-- Tratamento de valores nulos
+- Limpeza de dados (regex, deduplicação e tratamento de nulos)
 - Persistência em banco **SQLite**
 
 ### 2️⃣ Modelagem — `model_training.py`
 - **Feature Engineering**
-  - Criação de uma *feature soup* (Tags + Gêneros + Dev + Publisher)
-  - Peso maior para *tags* (maior relevância semântica)
+  - Criação de uma *feature soup* combinando:
+    - Tags (peso maior)
+    - Gêneros
+    - Desenvolvedores
+    - Publisher
+    - Short description
 - **Vetorização**
-  - `CountVectorizer` (Scikit-learn)
+  - `TF-IDF Vectorizer`
+  - `ngram_range=(1,2)` para capturar conceitos compostos
 - **Modelo**
-  - Similaridade de Cossenos
+  - `NearestNeighbors` com métrica de cosseno (Top-K)
+  - Sem cálculo de matriz NxN (escalável)
 - **Persistência**
   - Modelos salvos em arquivos `.pkl`
 
 ### 3️⃣ Aplicação — `app.py`
 - Interface web desenvolvida com **Streamlit**
-- Cache de modelos para melhor performance
-- Filtros interativos em tempo real
+- Cache de recursos para melhor performance
+- Consumo direto dos artefatos do modelo treinado
 
 ---
 
-## 🚀 Como Executar Localmente
+## 📊 Avaliação do Modelo
 
-### 1️⃣ Clonar o repositório
-git clone https://github.com/freixopedro23/steam-game-recommender-system.git
-cd steam-game-recommender-system
+Para validação da qualidade das recomendações, foi criado o script `evaluate.py`, que compara:
 
-### 2️⃣ Criar ambiente virtual
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
+- **COSINE (IA):** similaridade calculada pelo modelo (1 − cosine distance)
+- **TAGS (REAL):** overlap de tags usando índice de Jaccard (validação explicável)
 
-### 3️⃣ Instalar dependências
-pip install -r requirements.txt
+### 🔍 Resultado do teste
 
-### 4️⃣ Executar pipeline completo
-python main.py --reset
-
-### 5️⃣ Rodar aplicação
-streamlit run app.py
-
----
-
-## 📊 Dataset
-
-- Fonte: Kaggle — Steam Games Dataset
-- Registros: ~30.000 jogos
-- Campos principais:
-   - Tags
-   - Gêneros
-   - Desenvolvedor
-   - Publisher
-   - Avaliações da comunidade
-   - Compatibilidade por OS
-
----
-
-## ⚠️ Limitações Atuais
-
-- Modelo 100% content-based (não utiliza histórico de usuários)
-- Similaridade calculada sobre metadados (não considera gameplay real)
-- Matriz de similaridade pode ser custosa em memória para grandes volumes
-
----
-
-## 🔮 Próximos Passos (Evoluções Planejadas)
-
-- 🔄 Migrar de CountVectorizer para TF-IDF
-- ⚡ Implementar Top-K Nearest Neighbors (evitar matriz NxN)
-- 🧩 Versão híbrida (content-based + popularidade)
-- 👥 Integração com dados de reviews/playtime (Collaborative Filtering)
-- 📦 Dockerização do projeto
-- 🤖 Deploy em cloud (Streamlit Cloud / Hugging Face Spaces)
-
----
-
-## 👨‍💻 Autor
-
-**Pedro Freixo**
-🎓 Data Science — FIAP
-🎓 Profissão: Analista de Dados — EBAC
-
-🔗 GitHub: https://github.com/freixopedro23
-🔗 LinkedIn: https://www.linkedin.com/in/pedro-freixo-71b7ab212/
