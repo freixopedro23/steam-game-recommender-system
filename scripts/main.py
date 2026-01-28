@@ -4,6 +4,7 @@ import argparse
 from db_setup import init_db, DB_PATH
 from etl_steam import run_etl
 from model_training import train_model
+from reduce_data import minify_dataset
 
 # Definição dos caminhos
 MODELS_DIR = 'models'
@@ -60,6 +61,7 @@ if __name__ == '__main__':
     # Pipeline
     print("\n🚀 Iniciando Pipeline...")
     init_db()
+    minify_dataset()
     run_etl()
     train_model()
     print("\n🎉 Pipeline finalizado com sucesso!")

@@ -68,12 +68,12 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("🚸 **Controle Parental**")
     age_filter = st.slider(
-        "A idade do futuro jogador:",
+        "Classificação etária do jogo:",
         min_value=0,
         max_value=18,
         value=18,
         step=1,
-        help="Filtra jogos com classificação etária acima deste valor."
+        help="Exclui jogos com classificação etária acima deste valor."
     )
 
     # Filtro de qualidade
