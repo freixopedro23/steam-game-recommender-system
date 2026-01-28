@@ -21,9 +21,9 @@ def run_etl():
     print("Starting ETL... ")
 
     # Lendo o arquivo
-    csv_path = 'data/games_march2025_full.csv'
-    print(f"Lendo o arquivo {csv_path}")
-    df_game = pd.read_csv(csv_path, on_bad_lines='skip')
+    zip_path = 'data/games.zip'
+    print(f"Lendo o arquivo {zip_path}")
+    df_game = pd.read_csv(zip_path, compression='zip', on_bad_lines='skip')
 
     print(f"Tamanho do DataFrame original: {len(df_game)}")
 
